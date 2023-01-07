@@ -1,3 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+
 <h1>Login</h1>
 
 {% if wrongPassword %}
@@ -8,7 +12,12 @@
 
 <form method="POST" action="/login/">
     {% csrf_token %}
+    <input type="hidden" name="redirect" value="{{ redirect }}"> <!-- Verstecktes Feld mit der Variable redirect -->
     <div><input name="username" type="text"></div>
     <div><input name="password" type="password"></div>
     <div><button>Login</button></div>    
 </form>
+
+<div>Not registered? <a href="/register/">Click here</a></div>
+
+{% endblock %}

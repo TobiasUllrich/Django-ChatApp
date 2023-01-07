@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+
+
+{% if usercreated %}
+  <h1>{{ textforuser }}</h1>
+  <div>Login here <a href="/chat/">Click here</a></div>
+{% else %}
+
+<h1>Register</h1>
+<p>{{ textforuser }}</p>
+
+<form method="POST" action="/register/">
+    {% csrf_token %}
+    <!-- <input type="hidden" name="redirect" value="{{ redirect }}">  -->
+    <div><input name="username" type="text"></div>
+    <div><input name="password1" type="password"></div>
+    <div><input name="password2" type="password"></div>
+    <div><button>Register</button></div>    
+</form>
+
+{% endif %}
+
+
+
+
+
+
+
+{% endblock %}

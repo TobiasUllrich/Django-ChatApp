@@ -1,75 +1,91 @@
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+{% extends "base.html" %}
+{% block content %}
 
-<style>
-    .page-content{
-        padding:100px 100px;
-    }
-    .color-gray{
-      color: rgba(0,0,0,0.4);
-    }
-</style>
-
-<!-- Always shows a header, even in smaller screens. -->
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header">
-      <div class="mdl-layout__header-row">
-        <!-- Title -->
-        {% if request.user.is_authenticated %}
-          <span class="mdl-layout-title">Welcome, {{request.user.first_name}}</span>
-        {% else %}
-          Welcome! Please login!
-        {% endif %}
-
-        <!-- Add spacer, to align navigation to the right -->
-        <div class="mdl-layout-spacer"></div>
-        <!-- Navigation. We hide it in small screens. -->
-        <nav class="mdl-navigation mdl-layout--large-screen-only">
-          <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
-        </nav>
-      </div>
-    </header>
-    <div class="mdl-layout__drawer">
-      <span class="mdl-layout-title">Chatroom</span>
-      <nav class="mdl-navigation">
-        <a class="mdl-navigation__link" href="">Link</a>
-        <a class="mdl-navigation__link" href="">Link</a>
-        <a class="mdl-navigation__link" href="">Link</a>
-        <a class="mdl-navigation__link" href="">Link</a>
-      </nav>
-    </div>
-    <main class="mdl-layout__content">
-      <div class="page-content">
-
-      {% if request.user.is_authenticated %}
-
-      {% for message in messages %} 
-      <div>
-        <span class="color-gray">[{{ message.created_at }}]</span> {{ message.author.first_name }}: <i>{{ message.text }}</i>
-      </div>
-      {% endfor %} 
-
-        <form action="/chat/" method="post">
-          {% csrf_token %}
-            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-              <input class="mdl-textfield__input" name="textmessage" type="text" id="sample3">
-              <label class="mdl-textfield__label" name="textcontent" for="sample3">Text...</label>
-            </div>
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                Send
-            </button>
-          </form>
-      {% else %}
-          <h1>Nicht eingeloggt</h1>
-          <p>
-            Du bist aktuell nicht eingeloggt. Bitte logge dich ein.<br>
-            Bitte klicke <a href="/login/"> hier</a>
-          </p>
-      {% endif %}
-    </div>
-    </main>
+{% if request.user.is_authenticated %}
+<form onsubmit="sendMessage(); return false" method="post">
+  {% csrf_token %}
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" name="textmessage" type="text" id="messageField">
+    <label class="mdl-textfield__label" name="textcontent" for="messageField">Text...</label>
   </div>
+  <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+    Send
+  </button>
+</form>
+
+
+<div id="messageContainer">
+{% for message in messages reversed %}
+<div>
+  <span class="color-gray">[{{ message.created_at }}]</span> {{ message.author.first_name }}: <i>{{ message.text }}</i>
+</div>
+{% endfor %}
+</div>
+
+<script>
+
+  async function sendMessage() {
+    let fd = new FormData(); //FormData-Objekt generieren das im Body mitgesendet wird
+    let token = '{{ csrf_token }}'; //Token generieren
+    fd.append('textmessage', messageField.value); //FormData-Objekt enthält die Variable textmessage
+    fd.append('csrfmiddlewaretoken', token); //Token muss auch mitgesendet werden
+    let messageContainerSaved = messageContainer.innerHTML;
+    //POST-Request an URL chat; Body: Form-Data; Wir müssen warten, deswegen await
+    try {
+      let dateOfPost = giveActualDate();
+      messageContainer.innerHTML=`
+    <div id="deleteMessage">
+      <span class="color-gray">${dateOfPost}</span> {{ request.user.firstname }}: <i class="color-gray">${messageField.value}</i>
+    </div>`+messageContainerSaved;
+
+      let response = await fetch('/chat/', {
+        method: 'POST',
+        body: fd
+      });
+      console.log('Response is ',response);
+
+      let json = await response.json();
+      let jsonparsed = JSON.parse(json);
+
+      console.log('Json is ',json);
+      console.log('JsonParsed is ',jsonparsed);
+      console.log('JsonParsed is ',jsonparsed.fields.text);
+      console.log('JsonParsed is ',jsonparsed.fields.created_at);
+
+      document.getElementById('deleteMessage').remove(); //Element wird nach der Antwort durch das Backend entfernt
+      messageContainer.innerHTML=`
+    <div>
+      <span class="color-gray">${dateOfPost}</span> {{ request.user.firstname }}: <i>${messageField.value}</i>
+    </div>`+messageContainerSaved;
+      console.log('Success!');
+    }
+    catch (e) { 
+      console.log('Error occurred!', e);
+      messageContainer.innerHTML=`
+    <div id="deleteMessage">
+      <span class="color-gray">${dateOfPost}</span> {{ request.user.firstname }}: <i class="color-gray">${messageField.value}</i>
+    </div>`+messageContainerSaved;
+    }
+  }
+
+function giveActualDate(){
+var currentdate = new Date();  /* Erzeugt eine Datums-Variable mit aktuellem Datum */ 
+var datetime =  "[" + currentdate.toLocaleString('default', { month: 'short' }) + ". "
+                + currentdate.getDate() + ", "   /* Monat */
+                + currentdate.getFullYear() + "]";  /* Jahr */  
+                return datetime;
+}
+
+</script>
+
+
+
+{% else %}
+<h1>Nicht eingeloggt</h1>
+<p>
+  Du bist aktuell nicht eingeloggt. Bitte logge dich ein.<br>
+  Bitte klicke <a href="/login/"> hier</a>
+</p>
+{% endif %}
+
+{% endblock %}
