@@ -13,8 +13,8 @@
     
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-
+    <script src="{% static 'js/script.js' %}"></script>
+    
 </head>
 <body>
    
@@ -24,7 +24,7 @@
       <div class="mdl-layout__header-row">
         <!-- Title -->
         {% if request.user.is_authenticated %}
-          <span class="mdl-layout-title">Welcome, {{request.user.first_name}}</span>
+          <span class="mdl-layout-title">Welcome, {{request.user.username}}</span>
         {% else %}
           Welcome! Please login!
         {% endif %}
@@ -33,10 +33,10 @@
         <div class="mdl-layout-spacer"></div>
         <!-- Navigation. We hide it in small screens. -->
         <nav class="mdl-navigation mdl-layout--large-screen-only">
+          <!-- <a class="mdl-navigation__link" href="">Link</a>
           <a class="mdl-navigation__link" href="">Link</a>
           <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
+          <a class="mdl-navigation__link" href="">Link</a> -->
         </nav>
       </div>
     </header>

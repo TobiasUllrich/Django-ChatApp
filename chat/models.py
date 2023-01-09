@@ -12,6 +12,11 @@ class Chat(models.Model):
     created_at = models.DateField(default=date.today)
 
 
+class AuthorReceiverManager(models.Manager):
+    def get_by_natural_key(self, author, receiver):
+        return self.get(au=author, re=receiver)
+
+
 # Neue Klasse die quasi einer Datenbank-Tabelle entspricht
 class Message(models.Model):
     #Text-Feld & Datums-Feld
@@ -28,3 +33,7 @@ class Message(models.Model):
 
 #Standarwert einer Nachricht ist Null (default=None) und wir können auch nix mitgeben (blank=True) und Datenbank akzeptiert Null-Werte (null=True)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='chat_message_set', default=None, blank=True, null=True) 
+    
+    objects = AuthorReceiverManager()
+
+

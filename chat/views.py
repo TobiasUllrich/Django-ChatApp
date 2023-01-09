@@ -19,7 +19,7 @@ def index(request):
      print ("Received data" + request.POST.get('textmessage')) #Gibt uns die Nachricht aus, falls es sich um eine POST-Methode handelt
      myChat = Chat.objects.get(id=1) #Zieht uns den Chat mit der ID 1 und dieses Objekt wird unten mit der Message-Tabelle verknüpft
      new_message = Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, receiver=request.user) #Erstellt einen Datenbankeintrag und füllt die Felder
-     serialized_obj = serializers.serialize('json',[new_message])
+     serialized_obj = serializers.serialize('json',[new_message], use_natural_foreign_keys=True)
      return JsonResponse(serialized_obj[1:-1],safe=False) #Gibt uns einen Array zurück, weswegen wir vorher die [] wegschneiden
      
     #Unteres wird NICHT immer ausgeführt, sondern nur wenn es kein POST-Request ist, weil bei POST springt er vorher raus durch return 
@@ -29,21 +29,17 @@ def index(request):
 
 
 def login_view(request):
-    redirect=request.GET.get('next') #Variable redirect erhält den Wert (/chat/) unseres Qry-Parameters oben aus der URL-Leiste, sobald wir uns einloggen wollen
-    print('GET-REQUEST NEXT',request.GET.get('next'))
-    print('POST-REQUEST NEXT',request.POST.get('next'))
-    print('GET-REQUEST redirect',request.GET.get('redirect'))
-    print('POST-REQUEST redirect',request.POST.get('redirect'))
-    #Wenn POST-Methode, dann wird der If-Block ausgeführt
-    if request.method == 'POST':
-       user = authenticate(username=request.POST.get('username'), password=request.POST.get('password')) #Authentifizierungs-Funktion von Django
-       if user:
-           login(request,user) #Login-Funktion von Django -> loggt den User ein, wenn Username+Passwort korrekt sind
-           return HttpResponseRedirect(request.POST.get('redirect')) #Weiterleitung zur URL, welche in unserer redirect Variable gespeichert ist
-       else:
-           return HttpResponseRedirect('/chat/')
+    redirect=request.GET.get('next') #Variable redirect get value of next-parameter
+ 
+    if request.method == 'POST': #POST-Request
+       user = authenticate(username=request.POST.get('username'), password=request.POST.get('password')) #Authentification of User-Data
+       login(request,user) #Logs in the User if authenticated (username & password are correct)
+       if user: #Success
+           return JsonResponse({"LoggedIn": True, "RedirectTo": '/chat/'})
+       else: #Fail
+           return JsonResponse({"LoggedIn": False})
 
-    return render(request, 'auth/login.html',{'redirect': redirect}) #redirect-Variable zeigt an wohin wir weiterleiten
+    return render(request, 'auth/login.html',{'redirect': redirect}) #GET-Request
 
 
 
@@ -51,37 +47,31 @@ def login_view(request):
 
 def register_view(request):
  print('Registerbereich aufgerufen')
- #Checken ob user existiert
- #Checken ob passwörter gleich
- usercreated=False
- textforuser='Just type in your wished username and your password'
 
- if request.method == 'POST':
+ if request.method == 'POST' and request.POST.get('password1') == request.POST.get('password2'):
    username=request.POST.get('username')
    password1=request.POST.get('password1')
-   password2=request.POST.get('password2')
-   #If user does not already exist and passwords are equal -> User is created
-   if not User.objects.filter(username=username).exists() and password1==password2:
-    User.objects.create_user(username=username,password=password1)
-    usercreated=True
-    textforuser='Congratulations. You are registered :)'
-   elif User.objects.filter(username=username).exists():
-    usercreated=False
-    textforuser='We are sorry. This username already exists. Please choose another one.'
-   else:
-    usercreated=False
-    textforuser='We are sorry. Your passwords differ. Please ensure they are equal.'
+   createduser = User.objects.create_user(username=username,password=password1)
 
- return render(request, 'register/register.html',{'usercreated': usercreated,'textforuser': textforuser})
+   createduser = User.objects.filter(username=createduser)
+   print('yyyyyyyyyyyyyyyyyyyyyy',createduser)
+
+   serialized_obj = serializers.serialize('json',createduser)
+   print('xxxxxxxxxxxxxxxxxxxxx',serialized_obj)
+   return JsonResponse(serialized_obj[1:-1],safe=False) #Gibt uns einen Array zurück, weswegen wir vorher die [] wegschneiden
+   #return JsonResponse({"Registered": User.objects.filter(username=createduser)})
+
+ return render(request, 'register/register.html')
+
 
 
 def logout_view(request):
 
  if request.user.is_authenticated:
    logout(request)
-   textforuser = 'You have been logged out successfully.'
+   textforuser = 'Logged out successfully. Thanks for chatting ;)'
  else:
-   textforuser = 'Can`t logout, because you are not logged in.'
+   return HttpResponseRedirect('/chat/')
 
  return render(request, 'logout/logout.html',{'textforuser': textforuser})
 

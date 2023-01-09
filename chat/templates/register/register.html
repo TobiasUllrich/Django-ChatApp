@@ -1,32 +1,188 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
+<div class="register-center-container">
+  <div class="register-container">
+
+    <h1>Register</h1>
+    <p>Just type in your wished username and your password.</p>
+
+    <form onsubmit="register(); return false" method="POST">
+      {% csrf_token %}
+      <!--Username-->
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" id="username" name="username" type="text" required>
+        <label class="mdl-textfield__label" name="usernamecontent" for="username">Username</label>
+      </div>
+      <!--Password1-->
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" id="password1" name="password1" type="password" required>
+        <label class="mdl-textfield__label" name="passwordcontent" for="password1">Password</label>
+      </div>
+      <!--Password2-->
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" id="password2" name="password2" type="password" required>
+        <label class="mdl-textfield__label" name="passwordcontent" for="password2">Password</label>
+      </div>
+      <!--Button-->
+      <div class="register-button-container">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+          Register
+        </button>
+        <!-- Spinner while Loading -->
+        <div id="spinner" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active spinner d-none"></div>
+        <!-- ErrorField if something went wrong -->
+        <div id="error" class="error d-none"><img src="{% static 'img/error.png' %}"><span class="redtext">Couldn't
+            register. Username already in Use.</span></div>
+        <!-- PwErrorField if something went wrong -->
+        <div id="pwerror" class="error d-none"><img src="{% static 'img/error.png' %}"><span class="redtext">Your
+            Passwords are not equal.</span></div>
+        <!-- OK-Field if something went wrong -->
+        <div id="ok" class="error d-none"><img src="{% static 'img/ok.png' %}"><span class="greentext">You are
+            successfully registered.</span></div>
+      </div>
+    </form>
+
+  </div>
+</div>
 
 
+<script>
 
-{% if usercreated %}
-  <h1>{{ textforuser }}</h1>
-  <div>Login here <a href="/chat/">Click here</a></div>
-{% else %}
+  async function register() {
 
-<h1>Register</h1>
-<p>{{ textforuser }}</p>
+    if (password1.value !== password2.value) {
+      showPasswordsAreEqual();
+      return;
+    }
 
-<form method="POST" action="/register/">
-    {% csrf_token %}
-    <!-- <input type="hidden" name="redirect" value="{{ redirect }}">  -->
-    <div><input name="username" type="text"></div>
-    <div><input name="password1" type="password"></div>
-    <div><input name="password2" type="password"></div>
-    <div><button>Register</button></div>    
-</form>
+    let fd = new FormData(); //FormData-Objekt generieren das im Body mitgesendet wird
+    let token = '{{ csrf_token }}'; //Token generieren
+    fd.append('username', username.value); //FormData-Objekt enthält die Variable textmessage
+    fd.append('password1', password1.value); //FormData-Objekt enthält die Variable textmessage
+    fd.append('password2', password2.value); //FormData-Objekt enthält die Variable textmessage
+    fd.append('csrfmiddlewaretoken', token); //Token muss auch mitgesendet werden
 
-{% endif %}
+    //POST-Request an URL chat; Body: Form-Data; Wir müssen warten, deswegen await
+    try {
+      hideAllAlertInfos();
+
+      let response = await fetch('/register/', {
+        method: 'POST',
+        body: fd
+      });
+
+      let json = await response.json();
+      let jsonparsed = JSON.parse(json); //Now we have a real JSON
+      console.log('Response is ', response);
+      console.log(json);
+      console.log(jsonparsed);
+
+      showRegisteredSuccessfully();
+      emptyInputfields();
+    }
+    catch (e) {
+      showUserAlreadyExisting();
+      console.log('Error occurred!', e);
+    }
+  }
+
+  function showPasswordsAreEqual() {
+    document.getElementById('spinner').classList.add('d-none'); //Hide Spinner
+    document.getElementById('ok').classList.add('d-none'); //Hide OK 
+    document.getElementById('error').classList.add('d-none'); //Hide Error
+    document.getElementById('pwerror').classList.remove('d-none'); //Show PwError
+  }
+
+  function hideAllAlertInfos() {
+    document.getElementById('error').classList.add('d-none'); //Hide Error
+    document.getElementById('spinner').classList.remove('d-none'); //Show Spinner
+    document.getElementById('pwerror').classList.add('d-none'); //Hide PwError
+  }
+
+  function showRegisteredSuccessfully() {
+    document.getElementById('pwerror').classList.add('d-none'); //Hide PwError 
+    document.getElementById('spinner').classList.add('d-none'); //Hide Spinner
+    document.getElementById('ok').classList.remove('d-none'); //Show OK
+  }
+
+  function showUserAlreadyExisting() {
+    document.getElementById('spinner').classList.add('d-none'); //Hide Spinner
+    document.getElementById('ok').classList.add('d-none'); //Hide OK
+    document.getElementById('pwerror').classList.add('d-none'); //Hide PwError 
+    document.getElementById('error').classList.remove('d-none'); //Show Error
+  }
+
+  function emptyInputfields() {
+    username.value = "";
+    password1.value = "";
+    password2.value = "";
+  }
 
 
+</script>
 
 
+<style>
+  .register-center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .register-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 500px;
+  }
+  .register-button-container{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  form {
+    border: 3px solid green;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 25px;
+  }
+
+  input {
+    margin-bottom: 15px;
+  }
+
+  .spinner {
+    margin-top: 15px;
+  }
+
+  .d-none {
+    display: none !important;
+  }
+
+  .error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+  }
+
+  img {
+    margin-right: 10px;
+  }
+
+  .redtext {
+    color: red;
+  }
+
+  .greentext {
+    color: green;
+  }
+</style>
 
 
 
