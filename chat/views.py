@@ -9,64 +9,62 @@ from django.http import JsonResponse
 from django.core import serializers
 
 # Create your views here.
-@login_required(login_url='/login/') #Falls man nicht eingeloggt ist wird man sofort zum Login weitergeleitet
+
+@login_required(login_url='/login/') #index is only accessible if logged in, otherwise you will get redirected to login
 def index(request):
     """
-    This is a view to render the chat html
+    This is a view to render the chat
     """
     if request.method == 'POST':
-     print ("Received data" + request.POST['textmessage']) #Gibt uns die Nachricht aus, falls es sich um eine POST-Methode handelt
-     print ("Received data" + request.POST.get('textmessage')) #Gibt uns die Nachricht aus, falls es sich um eine POST-Methode handelt
-     myChat = Chat.objects.get(id=1) #Zieht uns den Chat mit der ID 1 und dieses Objekt wird unten mit der Message-Tabelle verknüpft
-     new_message = Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, receiver=request.user) #Erstellt einen Datenbankeintrag und füllt die Felder
-     serialized_obj = serializers.serialize('json',[new_message], use_natural_foreign_keys=True)
-     return JsonResponse(serialized_obj[1:-1],safe=False) #Gibt uns einen Array zurück, weswegen wir vorher die [] wegschneiden
+     myChat = Chat.objects.get(id=1) #Get Chat with id=1
+     new_message = Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, receiver=request.user) #Writes into our Message-Model
+     serialized_obj = serializers.serialize('json',[new_message], use_natural_foreign_keys=True) #Foreign-Keys are displayed as text
+     return JsonResponse(serialized_obj[1:-1],safe=False) #returns JSON
      
-    #Unteres wird NICHT immer ausgeführt, sondern nur wenn es kein POST-Request ist, weil bei POST springt er vorher raus durch return 
-    print('GET-Request')
-    chatMessages = Message.objects.filter(chat__id=1) #Wir holen uns alle Nachrichten in eine Variable wo die Chat-ID = 1 ist; Einrücken, weil es in jedem Fall angezeigt werden soll (nicht in den If-Teil packen)!
-    return render(request, 'chat/index.html', {'messages': chatMessages}) #Sendet Daten ans HTML zurück
+    #If GET 
+    chatMessages = Message.objects.filter(chat__id=1) #Get all messages from Chat with id=1
+    return render(request, 'chat/index.html', {'messages': chatMessages})
 
 
 def login_view(request):
-    redirect=request.GET.get('next') #Variable redirect get value of next-parameter
- 
-    if request.method == 'POST': #POST-Request
-       user = authenticate(username=request.POST.get('username'), password=request.POST.get('password')) #Authentification of User-Data
-       login(request,user) #Logs in the User if authenticated (username & password are correct)
-       if user: #Success
+    """
+     This is a view to login the user if not logged in, otherwise redirects to Chat-HTML
+    """
+    redirect = request.GET.get('next') #Variable redirect gets value of next-parameter, for redireciting to /chat/
+    
+    if request.method == 'POST':
+       user = authenticate(username=request.POST.get('username'), password=request.POST.get('password')) #Authentification of User possible?
+       if user != 'None': 
+           #User authenticated/registered (username & password are correct)
+           login(request,user) #Logs in the User
            return JsonResponse({"LoggedIn": True, "RedirectTo": '/chat/'})
-       else: #Fail
-           return JsonResponse({"LoggedIn": False})
+       else: 
+           #User not authenticated/registered (username or password is not correct)
+           return JsonResponse({"LoggedIn": False, "RedirectTo": '/chat/'})
 
     return render(request, 'auth/login.html',{'redirect': redirect}) #GET-Request
 
 
-
-
-
 def register_view(request):
- print('Registerbereich aufgerufen')
-
+ """
+  This is a view to register the user. It generates a 500 Server Error if user alreasy exists
+ """
  if request.method == 'POST' and request.POST.get('password1') == request.POST.get('password2'):
    username=request.POST.get('username')
    password1=request.POST.get('password1')
-   createduser = User.objects.create_user(username=username,password=password1)
-
-   createduser = User.objects.filter(username=createduser)
-   print('yyyyyyyyyyyyyyyyyyyyyy',createduser)
-
+   createduser = User.objects.create_user(username=username,password=password1) #User is created -> Error if user exists
+   createduser = User.objects.filter(username=createduser) #Filters the created user -> Error if user exists
+   
    serialized_obj = serializers.serialize('json',createduser)
-   print('xxxxxxxxxxxxxxxxxxxxx',serialized_obj)
-   return JsonResponse(serialized_obj[1:-1],safe=False) #Gibt uns einen Array zurück, weswegen wir vorher die [] wegschneiden
-   #return JsonResponse({"Registered": User.objects.filter(username=createduser)})
+   return JsonResponse(serialized_obj[1:-1],safe=False) #returns JSON
 
- return render(request, 'register/register.html')
-
+ return render(request, 'register/register.html') #GET-Request
 
 
 def logout_view(request):
-
+ """
+ This is a view to logout the user if logged in, otherwise redirects to Login-HTML
+ """
  if request.user.is_authenticated:
    logout(request)
    textforuser = 'Logged out successfully. Thanks for chatting ;)'

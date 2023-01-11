@@ -1,0 +1,55 @@
+.chat-center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 500px;
+}
+
+form {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#messageContainer {
+    width: 100%;
+}
+
+.textfield {
+    margin-top: 10px;
+}
+
+.send {
+    margin-right: 15px;
+}
+
+.page-content {
+    padding: 100px 100px;
+}
+
+.color-gray {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.color-red {
+    color: rgba(252, 4, 4, 0.4);
+}
+.color-black {
+    color: black;
+}
+.spinner {
+    position: absolute;
+    right: 14px;
+}
+
+.d-none {
+    display: none;
+}

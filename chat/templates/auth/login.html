@@ -2,18 +2,18 @@
 {% load static %}
 
 {% block content %}
-
-
-{% if wrongPassword %}
-<p>Benutzername oder Passwort ist falsch!</p>
-{% endif %}
+<script>
+  let token = '{{ csrf_token }}';
+</script>
+<script src="{% static 'js/login.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
 
 <div class="login-center-container">
   <div class="login-container">
     <h1>Login</h1>
     <form onsubmit="login(); return false" method="POST">
       {% csrf_token %}
-      <input type="hidden" name="redirect" value="{{ redirect }}"> <!-- Verstecktes Feld mit der Variable redirect -->
+      <input type="hidden" name="redirect" value="{{ redirect }}"> <!-- Hidden field with variable redirect -->
       <!--Username-->
       <div class="mdl-textfield mdl-js-textfield">
         <input class="mdl-textfield__input" id="username" name="username" type="text" required>
@@ -43,116 +43,4 @@
 
 </div>
 </div>
-
-
-
-<script>
-
-  async function login() {
-
-    let fd = new FormData(); //FormData-Objekt generieren das im Body mitgesendet wird
-    let token = '{{ csrf_token }}'; //Token generieren
-    fd.append('username', username.value); //FormData-Objekt enthält die Variable textmessage
-    fd.append('password', password.value); //FormData-Objekt enthält die Variable textmessage
-    fd.append('csrfmiddlewaretoken', token); //Token muss auch mitgesendet werden
-
-    //POST-Request an URL chat; Body: Form-Data; Wir müssen warten, deswegen await
-    try {
-      hidePasswordOrUsernameWrong();
-      showLoadingAnimation();
-
-      let response = await fetch('/login/', {
-        method: 'POST',
-        body: fd
-      });
-
-      console.log('Response is ', response);
-      let json = await response.json();
-      
-      removeLoadingAnimation();
-      window.location.href = `${json['RedirectTo']}`;
-      console.log('Success!');
-
-    }
-    catch (e) {
-      removeLoadingAnimation(); 
-      showPasswordOrUsernameWrong();
-      console.log('Error occurred!', e);
-    }
-  }
-
-  function showPasswordOrUsernameWrong() {
-    document.getElementById('error').classList.remove('d-none');
-  }
-  function hidePasswordOrUsernameWrong() {
-    document.getElementById('error').classList.add('d-none');
-  }
-  function showLoadingAnimation() {
-    document.getElementById('spinner').classList.remove('d-none');
-  }
-  function removeLoadingAnimation() {
-    document.getElementById('spinner').classList.add('d-none');
-  }
-
-  
-
-</script>
-
-<style>
-  .login-center-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 500px;
-  }
-  .login-button-container{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-  form {
-    border: 3px solid green;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 25px;
-  }
-
-  input {
-    margin-bottom: 15px;
-  }
-
-  .spinner {
-    margin-top: 15px;
-  }
-
-  .d-none {
-    display: none !important;
-  }
-
-  .error {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 15px;
-  }
-
-  img {
-    margin-right: 10px;
-  }
-
-  span {
-    color: red;
-  }
-</style>
-
-
-
 {% endblock %}
