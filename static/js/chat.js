@@ -17,7 +17,7 @@ async function sendMessage() {
     showSendingMessageSuccessful(`[${transformDateIntoWishedFormat(jsonparsed.fields.created_at)}]`,jsonparsed.fields.author['0'],jsonparsed.fields.text,'gray','black','',messageContainerSaved);
   }
   catch (e) {
-    showSendingMessageFailed(dateOfPost,username,messageField.value,'red','red','deleteMessage',messageContainerSaved);
+    showSendingMessageFailed(dateOfPost,username,messageField.value,'red','red','deleteMessage', messageContainerSaved);
   }
 }
 

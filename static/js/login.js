@@ -44,9 +44,13 @@ function hidePasswordOrUsernameWrong() {
   document.getElementById('error').classList.add('d-none');
 }
 function showLoadingAnimation() {
+  username.disabled = true;
+  password.disabled = true;
   hidePasswordOrUsernameWrong();
   document.getElementById('spinner').classList.remove('d-none');
 }
 function removeLoadingAnimation() {
+  username.disabled = false;
+  password.disabled = false;
   document.getElementById('spinner').classList.add('d-none');
 }
