@@ -28,8 +28,8 @@ class Message(models.Model):
 #Verknüpfung mit Fremdschlüssel des aktuell registrierten Users 
 # + Wenn User gelöscht, dann auch der Chat (CASCADE)
 # + Beziehungsschlüssel = Attribut author im Objekt Message
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author_message_set') 
-    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='receiver_message_set') 
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author_message_set',null=True) 
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='receiver_message_set',null=True) 
 
 #Standarwert einer Nachricht ist Null (default=None) und wir können auch nix mitgeben (blank=True) und Datenbank akzeptiert Null-Werte (null=True)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='chat_message_set', default=None, blank=True, null=True) 
