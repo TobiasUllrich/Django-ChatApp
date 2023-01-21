@@ -14,19 +14,33 @@ from django.contrib import auth
 
 
 #Testing Chat_View
-# class IndexTest(TestCase):
-#  def test_index(self):
-#   self.client = Client() #I am Client (Browser-Dummy)
-#   myChat = Chat.objects.create() #Model Chat has to be created, because not existing, when Testing
-#   myMessage = Message.objects.create() #Model Message has to be created, because not existing, when Testing
-#   response = self.client.post('/chat/', {'textmessage': 'hallo', 'author':self.client, 'receiver':self.client}) #Wir speichern die Antwort der URL in der Variable response (null=True in Models setzen, falls Fehler erzeugt wird)
-#   print(response) #RESPONSE 302!!!
-#   getPostedMessage = Message.objects.get(id=1) #If Message created it is the first Message
-#   self.assertEqual(getPostedMessage.chat,myChat.id)
-#   self.assertEqual(getPostedMessage.text,"hallo")
-#   self.assertEqual(getPostedMessage.author,self.client)
-#   self.assertEqual(response.status_code,200) #assertEqual ist eine Methode in der TestCase Klasse die den status-code der Antwort gegen den Wert 200 testet
+class IndexTest(TestCase):
+ def test_index(self):
+  
+  self.client = Client() #I am Client (Browser-Dummy)
+  test_login(self) 
+  myChat = Chat.objects.create() #Model Chat has to be created, because not existing, when Testing
+  myMessage = Message.objects.create() #Model Message has to be created, because not existing, when Testing
+  response = self.client.post('/chat/', {'textmessage': 'hallo', 'author':self.client, 'receiver':self.client}) #Wir speichern die Antwort der URL in der Variable response (null=True in Models setzen, falls Fehler erzeugt wird)
+  print('Response from Server ',response) #RESPONSE 302!!!
+  getPostedMessage = Message.objects.all()[0] #If Message created it is the first Message
+  #getPostedMessage = Message.objects.get(id=1)
 
+  print('Nachricht ',getPostedMessage)
+  self.assertEqual(getPostedMessage.chat,myChat.id)
+  self.assertEqual(getPostedMessage.text,"hallo")
+  self.assertEqual(getPostedMessage.author,self.client)
+  self.assertEqual(response.status_code,200) #assertEqual ist eine Methode in der TestCase Klasse die den status-code der Antwort gegen den Wert 200 testet
+
+def test_login(self):    
+    #User with Password has to be created at first, to make login
+    user = User.objects.create(username='testuser')
+    user.set_password('12345')
+    user.save()
+
+    self.client = Client() #I am Client (Browser-Dummy)
+    response = self.client.login(username='testuser', password='12345')
+    self.assertEqual(response,True) #Gibt OK zurück oder AssertionError: X != Y
 
 #Testing Login_View
 class LoginTest(TestCase):
@@ -49,11 +63,10 @@ class RegisterTest(TestCase):
     response = self.client.post('/register/', {'username': 'testuser', 'password1':'12345', 'password2':'12345'}) #Wir speichern die Antwort der URL in der Variable response
     print('Antwort des POST-Requests ',response)
 
-    #getUser = User.objects.get(username='testuser') #If User created with username 'testuser'
+    getUser = User.objects.get(username='testuser') #If User created with username 'testuser'
     print('Registrierter User ', auth.get_user(self.client))
     print('Registrierter User ', response.wsgi_request.user)
 
-
     assert auth.get_user(self.client).is_authenticated
-    #self.assertEqual(getUser, 1)
+    self.assertEqual(getUser, 1)
     self.assertEqual(response.status_code, 200) #Gibt OK zurück oder AssertionError: X != Y

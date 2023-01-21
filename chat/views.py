@@ -10,7 +10,7 @@ from django.core import serializers
 
 # Create your views here.
 
-# @login_required(login_url='/login/') #index is only accessible if logged in, otherwise you will get redirected to login
+@login_required(login_url='/login/') #index is only accessible if logged in, otherwise you will get redirected to login
 def index(request):
     """
     This is a view to render the chat
