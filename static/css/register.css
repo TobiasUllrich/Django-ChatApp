@@ -11,6 +11,10 @@
     width: 500px;
 }
 
+p {
+    text-align:center;
+}
+
 .register-button-container {
     display: flex;
     flex-direction: column;
@@ -54,4 +58,12 @@ img {
 
 .greentext {
     color: green;
+}
+
+
+@media (min-width:280px) and (max-width:350px) {
+
+    .register-container {
+        width: 80vw;
+    }
 }

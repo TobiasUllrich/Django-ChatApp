@@ -1,17 +1,17 @@
-.login-center-container {
+.register-center-container {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.login-container {
+.register-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 500px;
 }
 
-.login-button-container {
+.register-button-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -48,13 +48,10 @@ img {
     margin-right: 10px;
 }
 
-span {
+.redtext {
     color: red;
 }
 
-@media (min-width:280px) and (max-width:350px) {
-
-    .login-container {
-        width: 80vw;
-    }
+.greentext {
+    color: green;
 }

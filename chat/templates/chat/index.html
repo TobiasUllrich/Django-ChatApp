@@ -35,8 +35,10 @@
 <!-- Container for Messages -->
 <div id="messageContainer">
   {% for message in messages reversed %}
-  <div>
-    <span class="color-gray">[{{ message.created_at }}]</span> {{ message.author.username }}: <i>{{ message.text }}</i>
+  <div class="textbox">
+    <span class="color-gray">[{{ message.created_at }}]</span>
+    <span> {{ message.author.username }}: </span> 
+    <i> {{ message.text }} </i>
   </div>
   {% endfor %}
 </div>

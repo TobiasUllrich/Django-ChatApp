@@ -55,6 +55,6 @@ span {
 @media (min-width:280px) and (max-width:350px) {
 
     .login-container {
-        width: 80vw;
+        width: 90vw !important;
     }
 }
