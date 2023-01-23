@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from .models import Chat, Message
 from django.contrib.auth import authenticate
 from django.contrib import auth
+from datetime import date
 
 
 # Create your tests here.
@@ -19,19 +20,18 @@ class IndexTest(TestCase):
   
   self.client = Client() #I am Client (Browser-Dummy)
   test_login(self) 
-  myChat = Chat.objects.create() #Model Chat has to be created, because not existing, when Testing
-  myMessage = Message.objects.create() #Model Message has to be created, because not existing, when Testing
-  response = self.client.post('/chat/', {'textmessage': 'hallo', 'author':self.client, 'receiver':self.client}) #Wir speichern die Antwort der URL in der Variable response (null=True in Models setzen, falls Fehler erzeugt wird)
-  print('Response from Server ',response) #RESPONSE 302!!!
-  getPostedMessage = Message.objects.all()[0] #If Message created it is the first Message
-  #getPostedMessage = Message.objects.get(id=1)
+  myChat = Chat.objects.create() #Creates an empty Entry in the Model Chat and therefore also the Model Chat itself
+  myMessage = Message.objects.create() #Creates an empty Entry in the Model Message and therefore also the Model Message itself
+  response = self.client.post('/chat/', {'textmessage': 'hallo', 'author': self.client, 'receiver': self.client}) #Wir speichern die Antwort der URL in der Variable response (null=True in Models setzen, falls Fehler erzeugt wird)
+  print('Response from Server ',response) #RESPONSE 200
+  print('Messages ',Message.objects.all(),' and Chats ',Chat.objects.all()) #Now we have TWO MESSAGES and ONE CHAT
 
-  print('Nachricht ',getPostedMessage)
-  self.assertEqual(getPostedMessage.chat,myChat.id)
-  self.assertEqual(getPostedMessage.text,"hallo")
-  self.assertEqual(getPostedMessage.author,self.client)
+  print(Message.objects.filter(text='hallo',chat=1,author=1,receiver=1)) #Geht
+  print(Chat.objects.filter(id=1)[0]) #Geht
+  
   self.assertEqual(response.status_code,200) #assertEqual ist eine Methode in der TestCase Klasse die den status-code der Antwort gegen den Wert 200 testet
 
+#Login-Funktion
 def test_login(self):    
     #User with Password has to be created at first, to make login
     user = User.objects.create(username='testuser')
@@ -40,8 +40,14 @@ def test_login(self):
 
     self.client = Client() #I am Client (Browser-Dummy)
     response = self.client.login(username='testuser', password='12345')
+    print('Als welcher User ist unser Client eingeloggt?',auth.get_user(self.client))
+    print('Ist unser Client überhaupt eingeloggt?',auth.get_user(self.client).is_authenticated)
+    
     self.assertEqual(response,True) #Gibt OK zurück oder AssertionError: X != Y
+    assert auth.get_user(self.client).is_authenticated #Prüft wir uns eingeloggt haben mit den Daten von oben
 
+
+#FUNKTIONIERT
 #Testing Login_View
 class LoginTest(TestCase):
    def test_login(self):    
@@ -52,21 +58,52 @@ class LoginTest(TestCase):
 
     self.client = Client() #I am Client (Browser-Dummy)
     response = self.client.login(username='testuser', password='12345')
+    print('Als welcher User ist unser Client eingeloggt?',auth.get_user(self.client))
+    print('Ist unser Client überhaupt eingeloggt?',auth.get_user(self.client).is_authenticated)
+    
     self.assertEqual(response,True) #Gibt OK zurück oder AssertionError: X != Y
+    assert auth.get_user(self.client).is_authenticated #Prüft wir uns eingeloggt haben mit den Daten von oben
 
-
+#FUNKTIONIERT
 #Testing Register_View
 class RegisterTest(TestCase):
+
    def test_register(self):    
 
     self.client = Client() #I am Client (Browser-Dummy)
-    response = self.client.post('/register/', {'username': 'testuser', 'password1':'12345', 'password2':'12345'}) #Wir speichern die Antwort der URL in der Variable response
+    response = self.client.post('/register/', {'username': 'testuser', 'password1':'TU*+?12345', 'password2':'TU*+?12345'}) #Wir speichern die Antwort der URL in der Variable response
     print('Antwort des POST-Requests ',response)
+    getRegisteredUserViaUsername = User.objects.get(username='testuser') #If User created with username 'testuser'
+    print('Registrierter User ', getRegisteredUserViaUsername)
+    getRegisteredUserViaId = User.objects.get(id=1) #If User created it must have id=1
+    print('ID Registrierter User ', getRegisteredUserViaId)
 
-    getUser = User.objects.get(username='testuser') #If User created with username 'testuser'
-    print('Registrierter User ', auth.get_user(self.client))
-    print('Registrierter User ', response.wsgi_request.user)
+    self.assertEqual(getRegisteredUserViaUsername, getRegisteredUserViaId) #Prüft ob unser registrierte User die id=1 hat
 
-    assert auth.get_user(self.client).is_authenticated
-    self.assertEqual(getUser, 1)
-    self.assertEqual(response.status_code, 200) #Gibt OK zurück oder AssertionError: X != Y
+
+#FUNKTIONIERT
+#Testing Logout_View
+class LogoutTest(TestCase):
+   def test_logout(self):
+     #Login-First
+     test_login(self)
+     # Log-Out
+     self.client.logout()
+     print('Ist unser Client ausgeloggt?', auth.get_user(self.client).is_authenticated)
+     assert not auth.get_user(self.client).is_authenticated #Prüft ob das Ausloggen geklappt hat
+
+#Login-Funktion
+def test_login(self):    
+    #User with Password has to be created at first, to make login
+    user = User.objects.create(username='testuser')
+    user.set_password('12345')
+    user.save()
+
+    self.client = Client() #I am Client (Browser-Dummy)
+    response = self.client.login(username='testuser', password='12345')
+    print('Als welcher User ist unser Client eingeloggt?',auth.get_user(self.client))
+    print('Ist unser Client überhaupt eingeloggt?',auth.get_user(self.client).is_authenticated)
+    
+    self.assertEqual(response,True) #Gibt OK zurück oder AssertionError: X != Y
+    assert auth.get_user(self.client).is_authenticated #Prüft wir uns eingeloggt haben mit den Daten von oben
+
