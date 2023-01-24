@@ -8,6 +8,7 @@ from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.core import serializers
 
+
 # Create your views here.
 
 @login_required(login_url='/login/') #index is only accessible if logged in, otherwise you will get redirected to login

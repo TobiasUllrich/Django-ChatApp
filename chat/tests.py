@@ -9,9 +9,37 @@ from django.contrib import auth
 from datetime import date
 
 
+#For apps.py
+from django.apps import apps
+from django.test import TestCase
+from chat.apps import ChatConfig
+class ChatConfigTest(TestCase):
+    def test_chat(self):
+        self.assertEqual(ChatConfig.name, 'chat')
+        self.assertEqual(apps.get_app_config('chat').name, 'chat')
+
+
 # Create your tests here.
 #https://docs.djangoproject.com/en/4.1/topics/testing/tools/
 #https://docs.djangoproject.com/en/4.1/topics/testing/advanced/
+#https://www.argpar.se/posts/programming/testing-django-admin
+
+#For models.py
+from chat.models import Message
+
+class MessageTestCase(TestCase):
+ def create_message(self):
+    Message.objects.create(text="hallo",created_at="11-1-2023",chat=1,author=1,receiver=1)
+
+def test_message_is_there(self):
+        """Is the created Message there?"""
+        self.client = Client() #I am Client (Browser-Dummy)
+        create_message(self)
+        messageQuerySet = Message.objects.get(text="hallo",created_at="11-1-2023",chat=1,author=1,receiver=1)
+        print('Output ',messageQuerySet)
+        self.assertEqual(messageQuerySet, 'The lion says "roar"')
+
+
 
 
 #Testing Chat_View
