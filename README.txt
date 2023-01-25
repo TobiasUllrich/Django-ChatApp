@@ -5,5 +5,5 @@ Options:
 [1.] You can register
 [2.] You can login if you are registered
 -Then: You can post a message into the chat
-[3.] If you are logged in you can logout
+[3.] After logging in you can also logout
 
