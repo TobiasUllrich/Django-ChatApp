@@ -34,7 +34,7 @@ function getDataFromRegisterForm() {
 /**
  * Makes a POST-Request to the server
  * @param {Object} fd 
- * @returns a parsed JSON
+ * @returns a JSON
  */
 async function waitingForServerResponse(fd) {
   let response = await fetch('/register/', {
@@ -43,9 +43,7 @@ async function waitingForServerResponse(fd) {
   });
 
   let json = await response.json();
-  let jsonparsed = JSON.parse(json);
-  console.log('REGISTERED JSON', jsonparsed);
-  return jsonparsed;
+  return json;
 }
 
 /**
