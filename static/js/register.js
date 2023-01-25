@@ -4,7 +4,7 @@
  */
 async function register() {
   if (password1.value !== password2.value) {
-    showPasswordsAreEqual();
+    showPasswordsAreNotEqual();
     return;
   }
   let fd = getDataFromRegisterForm();
@@ -44,13 +44,14 @@ async function waitingForServerResponse(fd) {
 
   let json = await response.json();
   let jsonparsed = JSON.parse(json);
+  console.log('REGISTERED JSON', jsonparsed);
   return jsonparsed;
 }
 
 /**
  * Shows that registration failed, because passwords are not equal
  */
-function showPasswordsAreEqual() {
+function showPasswordsAreNotEqual() {
   document.getElementById('spinner').classList.add('d-none'); //Hide Spinner
   document.getElementById('ok').classList.add('d-none'); //Hide OK 
   document.getElementById('loginLink').classList.add('d-none'); //Hide Login-Link

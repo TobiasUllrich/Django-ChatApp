@@ -20,9 +20,7 @@ class ChatConfigTest(TestCase):
 
 
 # Create your tests here.
-#https://docs.djangoproject.com/en/4.1/topics/testing/tools/
-#https://docs.djangoproject.com/en/4.1/topics/testing/advanced/
-#https://www.argpar.se/posts/programming/testing-django-admin
+
 
 #For models.py
 from chat.models import Message

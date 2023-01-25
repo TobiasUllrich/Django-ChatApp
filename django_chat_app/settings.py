@@ -151,4 +151,3 @@ NOSE_ARGS = [
     '--cover-package=chat',
     '--cover-inclusive',
 ]
-#http://www.marinamele.com/2014/03/tools-for-testing-in-django-nose.html

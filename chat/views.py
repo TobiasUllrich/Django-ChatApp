@@ -55,9 +55,9 @@ def register_view(request):
    password1=request.POST.get('password1')
    createduser = User.objects.create_user(username=username,password=password1) #User is created -> Error if user exists
    createduser = User.objects.filter(username=createduser) #Filters the created user -> Error if user exists
-   
+
    serialized_obj = serializers.serialize('json',createduser)
-   return JsonResponse(serialized_obj[1:-1],safe=False) #returns JSON
+   return JsonResponse(serialized_obj[1:-1],safe=False) #returns JSON, but with key
 
  return render(request, 'register/register.html') #GET-Request
 
