@@ -13,7 +13,7 @@ from datetime import date
 from django.apps import apps
 from django.test import TestCase
 from chat.apps import ChatConfig
-class ChatConfigTest(TestCase):
+class ChatConfigTest(TestCase): #Muss Erben von TestCase
     def test_chat(self):
         self.assertEqual(ChatConfig.name, 'chat')
         self.assertEqual(apps.get_app_config('chat').name, 'chat')
@@ -89,6 +89,11 @@ class LoginTest(TestCase):
     
     self.assertEqual(response,True) #Gibt OK zurück oder AssertionError: X != Y
     assert auth.get_user(self.client).is_authenticated #Prüft wir uns eingeloggt haben mit den Daten von oben
+    
+    #Kann man zu chat weiterleiten?
+    response = self.client.get('/chat/')
+    self.assertEqual(response.status_code, 200)
+
 
 #FUNKTIONIERT
 #Testing Register_View
