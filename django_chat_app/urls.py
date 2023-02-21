@@ -22,6 +22,7 @@ from django_chat_app import settings
 
 from chat.views import index, login_view, register_view, logout_view
 
+#Kommentar für Branch-Test
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index),
